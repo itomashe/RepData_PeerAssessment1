@@ -1,12 +1,13 @@
 # Peer Assessment 1
 Igor Tomashevskiy  
 The dataset is stored in a comma-separated-value (CSV) file: activity.csv
-The variables included in this dataset are:
+The variables included in this dataset -  
 steps: Number of steps taking in a 5-minute interval (missing values are coded as NA)  
 date: The date on which the measurement was taken in YYYY-MM-DD format  
 interval: Identifier for the 5-minute interval in which measurement was taken.    
 
-**Data pre-processing**: 
+**Data pre-processing**  
+
 
 ```r
 pa_data<-read.csv("activity.csv",colClasses=c("integer",'Date','integer'),na.strings="NA")
@@ -23,8 +24,10 @@ summary(pa_data)
 ##  Max.   :806.00   Max.   :2012-11-30   Max.   :2355.0  
 ##  NA's   :2304
 ```
-There are a total of 17,568 observations in this dataset. Number of records with missing values is 2304.  
+There are 17,568 observations in this dataset. Number of records with missing values is 2304.  
+
 **Mean total number of steps taken per day**  
+
 New data set pa_data_agg will be created to calculate the mean and median of the total number of steps taken per day
 
 ```r
@@ -62,8 +65,10 @@ print(h1)
 
 ![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
 
-**Average daily activity pattern**    
-To answer the question about the average daily activity pattern we need to modify the dataset:
+**Average daily activity pattern**  
+
+To answer the question about the average daily activity pattern we need to modify the dataset:  
+
 
 ```r
 daily_activity<-aggregate(steps~interval,pa_data,mean)
@@ -78,7 +83,8 @@ print(t1)
 
 ![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
 
-Next we will calculate the 5-minute interval that contains the maximum number of steps on average across all the days in the dataset.
+Next we will calculate the 5-minute interval that contains the maximum number of steps on average across all the days
+in the dataset.  
 
 
 ```r
@@ -91,10 +97,11 @@ head(interval,1)
 ## 104      835 206.1698
 ```
 
-The 5 min intrval is 835  
+The 5 min interval is 835  
 
 **Imputing missing values**  
-There are a number of days/intervals where there are missing values in the original data set The presence of missing days may introduce bias into some calculations or summaries of the data.  
+
+There are a number of days/intervals with missing values in the original dataset. The presence of missing days may introduce bias into some calculations or summaries of the data.  
 The md.pattern() function in the mice package produces a tabulation of the missing data patterns.
 
 
@@ -148,8 +155,8 @@ aggr(pa_data, prop=FALSE, numbers=TRUE)
 
 ![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
 
-A quick fix for the missing data is to replace them by the mean. However, it will underestimate the variance, disturb the relations between variables. Mean imputation should perhaps only be used as a fix when we have only  a handful of values missing. Our data set contains about 13% of records with missing data.
-Better approach is to use mice package in R. By default, each varible with missing values is predicted from all other variables in the dataset. We will use the simple form of mice function with one dataset.
+A quick fix for the missing data is to replace them by the mean. However, it will underestimate the variance, disturb the relations between variables, bias all estimates other than the mean (will bias mean estimate also if data are not 'misisng completely at random'). Mean imputation could perhaps only be used as a fix when we have only a few values missing. Our data set contains about 13% of records with missing data.
+Better approach is to use mice package in R. By default, each varible with missing values is predicted from all other variables in the dataset. We will use the simple form of mice function with one dataset (m=1). In practice m is taken larger.
 
 
 ```r
@@ -170,8 +177,8 @@ imp<-mice(impute_data[,c(1,3,4)],m=1,seed=123)
 
 ```r
 temp_data<-complete(imp)
-colnames(temp_data)[1]<-"imp_steps"
-impute_data<-cbind(impute_data,temp_data$imp_steps)
+#colnames(temp_data)[1]<-"imp_steps"
+impute_data<-cbind(impute_data,temp_data$steps)
 colnames(impute_data)[5]<-"imp_steps"
 ```
 
@@ -181,6 +188,8 @@ print(h2)
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
+The histogram is quite similar to the first histogram.  
+
 
 ```r
 pa_data_agg<-aggregate(imp_steps~date,impute_data,sum)
@@ -207,7 +216,7 @@ impute_data$day[impute_data$day=="Saturday"|impute_data$day=="Sunday"]<-'weekend
 impute_data$day[impute_data$day!='weekend']<-'weekday'
 impute_data$day<-as.factor(impute_data$day)
 impute_data_agg<-aggregate(imp_steps~interval+day,data=impute_data,mean)
-xyplot(imp_steps~interval|day,impute_data_agg,type='l',layout=c(1,2))
+xyplot(imp_steps~interval|day,impute_data_agg,type='l',layout=c(1,2),ylab="steps")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-12-1.png) 
