@@ -2,9 +2,9 @@
 Igor Tomashevskiy  
 The dataset is stored in a comma-separated-value (CSV) file: activity.csv
 The variables included in this dataset -  
-steps: Number of steps taking in a 5-minute interval (missing values are coded as NA)  
-date: The date on which the measurement was taken in YYYY-MM-DD format  
-interval: Identifier for the 5-minute interval in which measurement was taken.    
+steps: Number of steps taking in a 5-minute interval (missing values are coded as NA).    
+date: The date on which the measurement was taken in YYYY-MM-DD format.    
+interval: Identifier for the 5-minute interval in which measurement was taken.      
 
 **Data pre-processing**  
 
@@ -73,7 +73,7 @@ To answer the question about the average daily activity pattern we need to modif
 ```r
 daily_activity<-aggregate(steps~interval,pa_data,mean)
 ```
-The code to produce the a time series plot:  
+The code to produce a time series plot:  
 
 
 ```r
@@ -97,7 +97,7 @@ head(interval,1)
 ## 104      835 206.1698
 ```
 
-The 5 min interval is 835  
+The 5 min interval is 835 
 
 **Imputing missing values**  
 
@@ -129,34 +129,13 @@ It is also easy to discern patterns visually.
 
 ```r
 library(VIM)
-```
-
-```
-## Loading required package: colorspace
-## Loading required package: grid
-## Loading required package: data.table
-## VIM is ready to use. 
-##  Since version 4.0.0 the GUI is in its own package VIMGUI.
-## 
-##           Please use the package to use the new (and old) GUI.
-## 
-## Suggestions and bug-reports can be submitted at: https://github.com/alexkowa/VIM/issues
-## 
-## Attaching package: 'VIM'
-## 
-## The following object is masked from 'package:datasets':
-## 
-##     sleep
-```
-
-```r
 aggr(pa_data, prop=FALSE, numbers=TRUE)
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
 
 A quick fix for the missing data is to replace them by the mean. However, it will underestimate the variance, disturb the relations between variables, bias all estimates other than the mean (will bias mean estimate also if data are not 'misisng completely at random'). Mean imputation could perhaps only be used as a fix when we have only a few values missing. Our data set contains about 13% of records with missing data.
-Better approach is to use mice package in R. By default, each varible with missing values is predicted from all other variables in the dataset. We will use the simple form of mice function with one dataset (m=1). In practice m is taken larger.
+Better approach is to use *mice* package in R. By default, each variable with missing values is predicted from all other variables in the dataset. We will use the simple form of *mice* function with one dataset (m=1).  
 
 
 ```r
@@ -177,7 +156,6 @@ imp<-mice(impute_data[,c(1,3,4)],m=1,seed=123)
 
 ```r
 temp_data<-complete(imp)
-#colnames(temp_data)[1]<-"imp_steps"
 impute_data<-cbind(impute_data,temp_data$steps)
 colnames(impute_data)[5]<-"imp_steps"
 ```
@@ -188,7 +166,9 @@ print(h2)
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
+
 The histogram is quite similar to the first histogram.  
+
 
 
 ```r
@@ -207,6 +187,9 @@ median(pa_data_agg$imp_steps)
 ```
 ## [1] 10571
 ```
+
+New calculated mean = 10492   , new calculated median = 10571  
+
 **Activity patterns between weekdays and weekends**  
 
 ```r
